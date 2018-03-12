@@ -93,7 +93,7 @@
 #define COLOR_YELLOW         RGB888_RGB565(0xFFFF00u)
 
 /* Font defines */
-#define FONT_HEADER_SIZE 4 // 1: pixel width of 1 font character, 2: pixel height, 
+#define FONT_HEADER_SIZE 4 // 1: pixel width of 1 font character, 2: pixel height,
 #define readFontByte(x) (&cfont)->font[x]
 
 //#if defined(ESP8266)
@@ -480,7 +480,7 @@ class TFT_22_ILI9225 {
 		void begin(void);
 
 		/// Clear the screen
-		void clear(void); 
+		void clear(void);
 
 		/// Invert screen
 		/// @param	flag true to invert, false for normal screen
@@ -496,11 +496,11 @@ class TFT_22_ILI9225 {
 
 		/// Set orientation
 		/// @param	orientation orientation, 0=portrait, 1=right rotated landscape, 2=reverse portrait, 3=left rotated landscape
-		void setOrientation(uint8_t orientation);  
+		void setOrientation(uint8_t orientation);
 
 		/// Get orientation
 		/// @return	orientation orientation, 0=portrait, 1=right rotated landscape, 2=reverse portrait, 3=left rotated landscape
-		uint8_t getOrientation(void); 
+		uint8_t getOrientation(void);
 
 		/// Font size, x-axis
 		/// @return	horizontal size of current font, in pixels
@@ -508,7 +508,7 @@ class TFT_22_ILI9225 {
 
 		/// Font size, y-axis
 		/// @return	vertical size of current font, in pixels
-		uint8_t fontY(void); 
+		uint8_t fontY(void);
 
 		/// Screen size, x-axis
 		/// @return	horizontal size of the screen, in pixels
@@ -525,18 +525,18 @@ class TFT_22_ILI9225 {
 		/// @param	y0 center, point coordinate, y-axis
 		/// @param	radius radius
 		/// @param	color 16-bit color
-		void drawCircle(uint16_t x0, uint16_t y0, uint16_t radius, uint16_t color);  
+		void drawCircle(uint16_t x0, uint16_t y0, uint16_t radius, uint16_t color);
 
 		/// Draw solid circle
 		/// @param	x0 center, point coordinate, x-axis
 		/// @param	y0 center, point coordinate, y-axis
 		/// @param	radius radius
 		/// @param	color 16-bit color
-		void fillCircle(uint8_t x0, uint8_t y0, uint8_t radius, uint16_t color); 
+		void fillCircle(uint8_t x0, uint8_t y0, uint8_t radius, uint16_t color);
 
 		/// Set background color
 		/// @param	color background color, default=black
-		void setBackgroundColor(uint16_t color = COLOR_BLACK);  
+		void setBackgroundColor(uint16_t color = COLOR_BLACK);
 
 		/// Draw line, rectangle coordinates
 		/// @param	x1 top left coordinate, x-axis
@@ -544,7 +544,7 @@ class TFT_22_ILI9225 {
 		/// @param	x2 bottom right coordinate, x-axis
 		/// @param	y2 bottom right coordinate, y-axis
 		/// @param	color 16-bit color
-		void drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color); 
+		void drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 
 		/// Draw rectangle, rectangle coordinates
 		/// @param	x1 top left coordinate, x-axis
@@ -552,7 +552,7 @@ class TFT_22_ILI9225 {
 		/// @param	x2 bottom right coordinate, x-axis
 		/// @param	y2 bottom right coordinate, y-axis
 		/// @param	color 16-bit color
-		void drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color); 
+		void drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 
 		/// Draw solid rectangle, rectangle coordinates
 		/// @param	x1 top left coordinate, x-axis
@@ -566,7 +566,7 @@ class TFT_22_ILI9225 {
 		/// @param	x1 point coordinate, x-axis
 		/// @param	y1 point coordinate, y-axis
 		/// @param	color 16-bit color
-		void drawPixel(uint16_t x1, uint16_t y1, uint16_t color);  
+		void drawPixel(uint16_t x1, uint16_t y1, uint16_t color);
 
 		/// Draw ASCII Text (pixel coordinates)
 		/// @param	x point coordinate, x-axis
@@ -598,7 +598,7 @@ class TFT_22_ILI9225 {
 		/// @param	x3 corner 3 coordinate, x-axis
 		/// @param	y3 corner 3 coordinate, y-axis
 		/// @param	color 16-bit color
-		void drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint16_t color); 
+		void drawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint16_t color);
 
 		/// Draw solid triangle, triangle coordinates
 		/// @param	x1 corner 1 coordinate, x-axis
@@ -624,8 +624,9 @@ class TFT_22_ILI9225 {
 
                 void setValues(uint8_t rst, uint8_t rs, uint8_t cs, uint8_t led);
                 void screenSS(uint32_t miliseconds);
-                void startSS1(int x, int y,int x1, int y1,int x2, int y2,int x3, int y3,uint8_t m, uint8_t n, uint32_t color);
+                void startSS1(int x, int y,int x1, int y1,int x2, int y2,int x3, int y3, uint32_t color);
 
+                void draw_tree(int x, int y, uint32_t color);
 	private:
 
 		void	 _swap(uint16_t &a, uint16_t &b),

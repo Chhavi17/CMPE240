@@ -1,43 +1,54 @@
-#include "TFT_22_ILI9225.h"
+#include "TFT_22_ILI9225.hpp"
 #include "FreeRTOS.h"
 #include "ssp1.h"
 #include "task.h"
+#include "utilities.h"
+#include "stdio.h"
+#include "math.h"
 #include <stdlib.h>
 #define RS 26
 #define CS 31
 #define RST 29
 #define BL 28
 
-void TFT_22_ILI9225::RS_High(){
- LPC_GPIO0->FIOSET = (1 << RS);
+void TFT_22_ILI9225::RS_High()
+{
+    LPC_GPIO0->FIOSET = (1 << RS);
 }
 
-void TFT_22_ILI9225::RS_Low(){
- LPC_GPIO0->FIOCLR = (1 << RS);
+void TFT_22_ILI9225::RS_Low()
+{
+    LPC_GPIO0->FIOCLR = (1 << RS);
 }
 
-void TFT_22_ILI9225::CS_High(){
- LPC_GPIO1->FIOSET = (1 << CS);
+void TFT_22_ILI9225::CS_High()
+{
+    LPC_GPIO1->FIOSET = (1 << CS);
 }
 
-void TFT_22_ILI9225::CS_Low(){
- LPC_GPIO1->FIOCLR = (1 << CS);
+void TFT_22_ILI9225::CS_Low()
+{
+    LPC_GPIO1->FIOCLR = (1 << CS);
 }
 
-void TFT_22_ILI9225::RST_High(){
- LPC_GPIO4->FIOSET = (1 << RST);
+void TFT_22_ILI9225::RST_High()
+{
+    LPC_GPIO4->FIOSET = (1 << RST);
 }
 
-void TFT_22_ILI9225::RST_Low() {
- LPC_GPIO4->FIOCLR = (1 << RST);
+void TFT_22_ILI9225::RST_Low()
+{
+    LPC_GPIO4->FIOCLR = (1 << RST);
 }
 
-void TFT_22_ILI9225::LED_High(){
- LPC_GPIO4->FIOSET = (1 << BL);
+void TFT_22_ILI9225::LED_High()
+{
+    LPC_GPIO4->FIOSET = (1 << BL);
 }
 
-void TFT_22_ILI9225::LED_Low() {
- LPC_GPIO4->FIOCLR = (1 << BL);
+void TFT_22_ILI9225::LED_Low()
+{
+    LPC_GPIO4->FIOCLR = (1 << BL);
 }
 
 // Constructor when using software SPI.  All output pins are configurable.
@@ -45,7 +56,8 @@ TFT_22_ILI9225::TFT_22_ILI9225()
 {
 }
 
-void TFT_22_ILI9225::setValues(uint8_t rst, uint8_t rs, uint8_t cs, uint8_t led) {
+void TFT_22_ILI9225::setValues(uint8_t rst, uint8_t rs, uint8_t cs, uint8_t led)
+{
     _rst = rst;
     _rs = rs;
     _cs = cs;
@@ -98,24 +110,24 @@ void TFT_22_ILI9225::begin()
 
     // Set up pins
 
-    LPC_PINCON->PINSEL9 &= ~((1 << 24)|(1 << 25));
+    LPC_PINCON->PINSEL9 &= ~((1 << 24) | (1 << 25));
     LPC_GPIO4->FIODIR |= (1 << _led);
-    LPC_GPIO4->FIOSET= (1 << _led);
+    LPC_GPIO4->FIOSET = (1 << _led);
 
-    LPC_PINCON->PINSEL9 &= ~((1 << 27)|(1 << 26));
+    LPC_PINCON->PINSEL9 &= ~((1 << 27) | (1 << 26));
     LPC_GPIO4->FIODIR |= (1 << _rst);
     LPC_GPIO4->FIOSET = (1 << _rst);
 
-    LPC_PINCON->PINSEL1 &= ~((1 << 21)|(1 << 20));
-    LPC_PINCON->PINSEL3 &= ~((1 << 31)|(1 << 30));
+    LPC_PINCON->PINSEL1 &= ~((1 << 21) | (1 << 20));
+    LPC_PINCON->PINSEL3 &= ~((1 << 31) | (1 << 30));
     LPC_GPIO0->FIODIR |= (1 << _rs);
     LPC_GPIO1->FIODIR |= (1 << _cs);
 
     LPC_GPIO0->FIOCLR = (1 << _rs);
     LPC_GPIO1->FIOCLR = (1 << _cs);
 
-        ssp1_init();
-        ssp1_set_max_clock(4);
+    ssp1_init();
+    ssp1_set_max_clock(4);
 
     // Turn on backlight
     LED_High();
@@ -200,7 +212,7 @@ void TFT_22_ILI9225::clear()
 {
     uint8_t old = _orientation;
     setOrientation(0);
-    fillRectangle(0, 0, _maxX - 1, _maxY - 1, rand()%0xFFFFFFu);
+    fillRectangle(0, 0, _maxX - 1, _maxY - 1, rand() % 0xFFFFFFu);
     setOrientation(old);
     vTaskDelay(10);
 }
@@ -212,12 +224,10 @@ void TFT_22_ILI9225::invert(bool flag)
 
 void TFT_22_ILI9225::setBacklight(bool flag)
 {
-    if (flag)
-    {
+    if (flag) {
         LED_High();
     }
-    else
-    {
+    else {
         LED_Low();
     }
 }
@@ -542,58 +552,131 @@ void TFT_22_ILI9225::fillTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_
     }
 }
 
-void TFT_22_ILI9225::screenSS(uint32_t miliseconds=100) {
-    int x,y,x1,y1;
+void TFT_22_ILI9225::screenSS(uint32_t miliseconds = 100)
+{
+    int x, y, x1, y1;
     int counter = 0;
-    if (miliseconds > 100)
-    {
+    if (miliseconds > 100) {
         miliseconds = 100;
     }
-    else if(miliseconds < 50)
-    {
+    else if (miliseconds < 50) {
         miliseconds = 50;
     }
 
-        while(miliseconds--) 
-        {
-            x = rand()% LCD_WIDTH;
-            y = rand()% LCD_HEIGHT;
-            x1 = rand()% LCD_WIDTH;
-            y1 = rand()% LCD_HEIGHT;
-            drawRectangle(x,y,x1,y1,(rand() % 16777215));
-            counter++;
-        }
-        fillRectangle(0,0,LCD_WIDTH-1,LCD_HEIGHT-1,(rand() % 16777215));
+    while (miliseconds--) {
+        x = rand() % LCD_WIDTH;
+        y = rand() % LCD_HEIGHT;
+        x1 = rand() % LCD_WIDTH;
+        y1 = rand() % LCD_HEIGHT;
+        drawRectangle(x, y, x1, y1, (rand() % 16777215));
+        counter++;
+    }
+    fillRectangle(0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1, (rand() % 16777215));
 }
 
-void TFT_22_ILI9225::startSS1(int x, int y,int x1, int y1,int x2, int y2,int x3, int y3, uint8_t m, uint8_t n, uint32_t color) 
+void TFT_22_ILI9225::startSS1(int x, int y, int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color)
 {
-    if (x==x1 && y==y1)
-    {
-        return;
+
+    int X0[10], Y0[10], X1[10], Y1[10], X2[10], Y2[10], X3[10], Y3[10];
+    X0[0] = x;
+    Y0[0] = y;
+    X1[0] = x1;
+    Y1[0] = y1;
+    X2[0] = x2;
+    Y2[0] = y2;
+    X3[0] = x3;
+    Y3[0] = y3;
+    drawLine(x, y, x1, y1, color);
+    drawLine(x1, y1, x2, y2, color);
+    drawLine(x2, y2, x3, y3, color);
+    drawLine(x3, y3, x, y, color);
+
+    for (int i = 1; i < 10; i++) {
+        X0[i] = X0[i - 1] - 0.2 * (X0[i - 1] - X1[i - 1]);
+        Y0[i] = Y0[i - 1] + 0.2 * (Y1[i - 1] - Y0[i - 1]);
+
+        X1[i] = X1[i - 1] - 0.2 * (X1[i - 1] - X2[i - 1]);
+        Y1[i] = Y1[i - 1] - 0.2 * (Y1[i - 1] - Y2[i - 1]);
+
+        X2[i] = X2[i - 1] + 0.2 * (X3[i - 1] - X2[i - 1]);
+        Y2[i] = Y2[i - 1] - 0.2 * (Y2[i - 1] - Y3[i - 1]);
+
+        X3[i] = X3[i - 1] + 0.2 * (X0[i - 1] - X3[i - 1]);
+        Y3[i] = Y3[i - 1] + 0.2 * (Y0[i - 1] - Y3[i - 1]);
+
+        drawLine(X0[i], Y0[i], X1[i], Y1[i], color - i);
+        drawLine(X1[i], Y1[i], X2[i], Y2[i], color - i);
+        drawLine(X2[i], Y2[i], X3[i], Y3[i], color - i);
+        drawLine(X3[i], Y3[i], X0[i], Y0[i], color - i);
+        vTaskDelay(100);
     }
 
-    drawLine(x,y,x1,y1,color--);
-    drawLine(x1,y1,x2,y2,color--);
-    drawLine(x2,y2,x3,y3,color--);
-    drawLine(x3,y3,x,y,color--);
-
-    int X,X1,X2,X3,Y,Y1,Y2,Y3;
-    int total = m+n;
-    X = (((m*x1)+(n*x))/total);
-    Y = (((m*y1)+(n*y))/total);
-    
-    X1 = (((m*x2)+(n*x1))/total);
-    Y1 = (((m*y2)+(n*y1))/total);
-    
-    X2 = (((m*x3)+(n*x2))/total);
-    Y2 = (((m*y3)+(n*y2))/total);
-    
-    X3 = (((m*x)+(n*x3))/total);
-    Y3 = (((m*y)+(n*y3))/total);
-    
     vTaskDelay(100);
-    startSS1(X,Y,X1,Y1,X2,Y2,X3,Y3,m,n,color--);
+
+}
+
+void TFT_22_ILI9225::draw_tree(int xb, int yb, uint32_t color)
+{
+
+    float lamda = 0.8;
+    int x_base = xb;
+    int y_base = yb;
+    int x[10][60000], y[10][60000];
+
+    //trunk(level 0)
+    x[0][0] = x_base;
+    y[0][0] = LCD_HEIGHT / 2;
+    drawLine(x[0][0], y[0][0], x_base, y_base, color);
+
+    //level 1 mid
+    x[1][1] = x_base;
+    y[1][1] = y[0][0] + (lamda * (y[0][0] - y_base));
+    vTaskDelay(100);
+    drawLine(x[0][0], y[0][0], x[1][1], y[1][1], color);
+
+    //level 1 left
+    x[1][0] = x[1][1] * 0.87 + y[1][1] * 0.5 - x[0][0] * 0.87 - y[0][0] * 0.5 + x[0][0]; //left
+    y[1][0] = -(x[1][1] * 0.5) + y[1][1] * 0.87 + (x[0][0] * 0.5) - y[0][0] * 0.87 + y[0][0]; //left
+    vTaskDelay(100);
+    drawLine(x[0][0], y[0][0], x[1][0], y[1][0], color);
+
+    //level 1 right
+    x[1][2] = x[1][1] * 0.87 - y[1][1] * 0.5 - x[0][0] * 0.87 + y[0][0] * 0.5 + x[0][0]; //right
+    y[1][2] = (x[1][1] * 0.5) + y[1][1] * 0.87 - (x[0][0] * 0.5) - y[0][0] * 0.87 + y[0][0]; // right
+    vTaskDelay(100);
+    drawLine(x[0][0], y[0][0], x[1][2], y[1][2], color);
+
+//    //level 2 mid(hardcoded)
+//    x[2][1] = x[1][0] + (lamda * (x[1][0] - x[0][0]));
+//    y[2][1] = y[1][0] + (lamda * (y[1][0] - y[0][0]));
+//    vTaskDelay(100);
+//    drawLine( x[2][1],y[2][1],x[1][0],y[1][0],color);
+
+    //subsequent levels
+    for (int i = 2; i < 10; i++) {
+        for (int j = 0; j < pow(3, i - 1); j++) {
+            //mid lines
+            x[i][3 * j + 1] = x[i - 1][j] + (lamda * (x[i - 1][j] - x[i - 2][j % 3]));
+            y[i][3 * j + 1] = y[i - 1][j] + (lamda * (y[i - 1][j] - y[i - 2][j % 3]));
+            //vTaskDelay(100);
+            //drawLine( x[i][3 * j + 1],y[i][3 * j + 1],x[i - 1][j],y[i - 1][j],color);
+
+            //left lines
+            x[i][3 * j] = 0.87 * x[i][3 * j + 1] + 0.5 * y[i][3 * j + 1] - 0.87 * x[i - 1][(j % 3)] - 0.5 * y[i - 1][(j % 3)] + x[i - 1][(j % 3)];
+            y[i][3 * j] = -0.5 * x[i][3 * j + 1] + 0.87 * y[i][3 * j + 1] + 0.5 * x[i - 1][(j % 3)] - 0.87 * y[i - 1][(j % 3)] + y[i - 1][(j % 3)];
+            // vTaskDelay(1000);
+            // drawLine( x[i][3 * j],y[i][3 * j],x[i - 1][(j % 3)],y[i - 1][(j % 3)],color-i);
+
+            //right lines
+            x[i][3 * j + 2] = 0.87 * x[i][3 * j + 1] + 0.5 * y[i][3 * j + 1] - 0.87 * x[i - 1][(j % 3)] - 0.5 * y[i - 1][(j % 3)] + x[i - 1][(j % 3)];
+            y[i][3 * j + 2] = (0.5 * x[i][3 * j + 1]) + 0.87 * y[i][3 * j + 1] - 0.5 * x[i - 1][(j % 3)] - 0.87 * y[i - 1][(j % 3)] + y[i - 1][(j % 3)];
+            //  vTaskDelay(1000);
+            //  drawLine( x[i][3 * j + 2],y[i][3 * j + 2],x[i - 1][(j % 3)],y[i - 1][(j % 3)],color-i);
+        }
+
+    }
+    vTaskDelay(1000);
+
 }
 
 void TFT_22_ILI9225::setBackgroundColor(uint16_t color)
@@ -618,7 +701,7 @@ uint16_t TFT_22_ILI9225::drawText(uint16_t x, uint16_t y, str s, uint16_t color)
 
     uint16_t currx = x;
 
-    // Print every character in string
+// Print every character in string
     for (uint8_t k = 0; k < s.getLen(); k++) {
         currx += drawChar(currx, y, s[k], color) + 1;
     }
@@ -657,4 +740,3 @@ uint16_t TFT_22_ILI9225::drawChar(uint16_t x, uint16_t y, uint16_t ch, uint16_t 
     };
     return charWidth;
 }
-
