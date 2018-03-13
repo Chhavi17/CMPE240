@@ -19,7 +19,7 @@ private:
         int x,y,x1,y1,x2,y2,x3,y3;
         int side;
 public:
-    LCD(uint8_t priority) : scheduler_task("LCD_interface", 1024, priority){    }
+    LCD(uint8_t priority) : scheduler_task("LCD_interface", 1024*3, priority){    }
 
     bool init(){
         lcd.setValues(RST,RS,CS,BL);
@@ -48,14 +48,14 @@ public:
 
 
         //trees
-        x = rand()% (LCD_WIDTH);
-        y = rand()% (LCD_HEIGHT/2);
+        //x = LCD_WIDTH/2;
+        x = rand()%LCD_WIDTH;
+        y = 0;
         uint32_t color = rand()%0xFFFFFFu;
-        if (x < LCD_WIDTH && y < LCD_HEIGHT/2 )
-        {
-            lcd.draw_tree(x,y,color);
-        }
 
+            lcd.draw_tree(x,y,color);
+
+//lcd.drawLine(LCD_WIDTH/2,0,LCD_WIDTH+10,LCD_HEIGHT-15,color);
 
 
 

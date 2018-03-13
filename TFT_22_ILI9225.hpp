@@ -475,6 +475,7 @@ class TFT_22_ILI9225 {
 
 	public:
 		TFT_22_ILI9225();
+		static int counter = 0;
 
 		/// Initialization
 		void begin(void);
@@ -627,6 +628,7 @@ class TFT_22_ILI9225 {
                 void startSS1(int x, int y,int x1, int y1,int x2, int y2,int x3, int y3, uint32_t color);
 
                 void draw_tree(int x, int y, uint32_t color);
+                void draw_branch(int x_base,int y_base,int xp, int yp,float lamda,uint32_t color);
 	private:
 
 		void	 _swap(uint16_t &a, uint16_t &b),

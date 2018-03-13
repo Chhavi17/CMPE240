@@ -614,6 +614,42 @@ void TFT_22_ILI9225::startSS1(int x, int y, int x1, int y1, int x2, int y2, int 
     vTaskDelay(100);
 
 }
+int TFT_22_ILI9225::counter = 0 ;
+void TFT_22_ILI9225::draw_branch(int x_base, int y_base, int xp, int yp, float lamda, uint32_t color)
+{
+
+    int xm, ym, xl, yl, xr, yr;
+    int dx = (xp - x_base);
+    int dy = (yp - y_base);
+    xm = xp + (lamda * dx);
+    ym = yp + (lamda * dy);
+    if (dx < 10 && dy < 10) return;
+    // vTaskDelay(100);
+
+    if (xm < LCD_WIDTH && ym < LCD_HEIGHT && xp < LCD_WIDTH && yp < LCD_HEIGHT
+            && xm >0 && ym >0 && xp  >0 && yp  >0)
+
+        drawLine(xp, yp, xm, ym, color);
+
+    xl = xm * 0.87 + ym * 0.5 - xp * 0.87 - yp * 0.5 + xp;
+    yl = -(xm * 0.5) + ym * 0.87 + (xp * 0.5) - yp * 0.87 + yp; //left
+    //   vTaskDelay(100);
+    if (xl < LCD_WIDTH && yl < LCD_HEIGHT && xp < LCD_WIDTH && yp < LCD_HEIGHT
+             && xl >0 && yl >0 && xp  >0 && yp  >0)
+        drawLine(xp, yp, xl, yl, color);
+    //
+    //    //level 1 right
+    xr = xm * 0.87 - ym * 0.5 - xp * 0.87 + yp * 0.5 + xp; //right
+    yr = (xm * 0.5) + ym * 0.87 - (xp * 0.5) - yp * 0.87 + yp; // right
+    //   vTaskDelay(100);
+    if (xr < LCD_WIDTH && yr < LCD_HEIGHT && xp < LCD_WIDTH && yp < LCD_HEIGHT
+            && xr >0 && yr >0 && xp  >0 && yp  >0)
+        drawLine(xp, yp, xr, yr, color);
+
+    draw_branch(xp, yp, xl, yl, lamda, color);
+    draw_branch(xp, yp, xm, ym, lamda, color);
+    draw_branch(xp, yp, xr, yr, lamda, color);
+}
 
 void TFT_22_ILI9225::draw_tree(int xb, int yb, uint32_t color)
 {
@@ -621,61 +657,68 @@ void TFT_22_ILI9225::draw_tree(int xb, int yb, uint32_t color)
     float lamda = 0.8;
     int x_base = xb;
     int y_base = yb;
-    int x[10][60000], y[10][60000];
+    int xp = x_base;
+    int yp = rand() % (LCD_HEIGHT / 4);
+    //int length = yp;
+    //  int x[10][60000], y[10][60000];
 
     //trunk(level 0)
-    x[0][0] = x_base;
-    y[0][0] = LCD_HEIGHT / 2;
-    drawLine(x[0][0], y[0][0], x_base, y_base, color);
 
-    //level 1 mid
-    x[1][1] = x_base;
-    y[1][1] = y[0][0] + (lamda * (y[0][0] - y_base));
+    drawLine(xp, yp, x_base, y_base, color);
     vTaskDelay(100);
-    drawLine(x[0][0], y[0][0], x[1][1], y[1][1], color);
 
-    //level 1 left
-    x[1][0] = x[1][1] * 0.87 + y[1][1] * 0.5 - x[0][0] * 0.87 - y[0][0] * 0.5 + x[0][0]; //left
-    y[1][0] = -(x[1][1] * 0.5) + y[1][1] * 0.87 + (x[0][0] * 0.5) - y[0][0] * 0.87 + y[0][0]; //left
-    vTaskDelay(100);
-    drawLine(x[0][0], y[0][0], x[1][0], y[1][0], color);
+    draw_branch(x_base, y_base, xp, yp, lamda, color);
 
-    //level 1 right
-    x[1][2] = x[1][1] * 0.87 - y[1][1] * 0.5 - x[0][0] * 0.87 + y[0][0] * 0.5 + x[0][0]; //right
-    y[1][2] = (x[1][1] * 0.5) + y[1][1] * 0.87 - (x[0][0] * 0.5) - y[0][0] * 0.87 + y[0][0]; // right
-    vTaskDelay(100);
-    drawLine(x[0][0], y[0][0], x[1][2], y[1][2], color);
-
-//    //level 2 mid(hardcoded)
-//    x[2][1] = x[1][0] + (lamda * (x[1][0] - x[0][0]));
-//    y[2][1] = y[1][0] + (lamda * (y[1][0] - y[0][0]));
+//    //level 1 mid
+//    x[1][1] = x_base;
+//    y[1][1] = y[0][0] + (lamda * (y[0][0] - y_base));
 //    vTaskDelay(100);
-//    drawLine( x[2][1],y[2][1],x[1][0],y[1][0],color);
-
-    //subsequent levels
-    for (int i = 2; i < 10; i++) {
-        for (int j = 0; j < pow(3, i - 1); j++) {
-            //mid lines
-            x[i][3 * j + 1] = x[i - 1][j] + (lamda * (x[i - 1][j] - x[i - 2][j % 3]));
-            y[i][3 * j + 1] = y[i - 1][j] + (lamda * (y[i - 1][j] - y[i - 2][j % 3]));
-            //vTaskDelay(100);
-            //drawLine( x[i][3 * j + 1],y[i][3 * j + 1],x[i - 1][j],y[i - 1][j],color);
-
-            //left lines
-            x[i][3 * j] = 0.87 * x[i][3 * j + 1] + 0.5 * y[i][3 * j + 1] - 0.87 * x[i - 1][(j % 3)] - 0.5 * y[i - 1][(j % 3)] + x[i - 1][(j % 3)];
-            y[i][3 * j] = -0.5 * x[i][3 * j + 1] + 0.87 * y[i][3 * j + 1] + 0.5 * x[i - 1][(j % 3)] - 0.87 * y[i - 1][(j % 3)] + y[i - 1][(j % 3)];
-            // vTaskDelay(1000);
-            // drawLine( x[i][3 * j],y[i][3 * j],x[i - 1][(j % 3)],y[i - 1][(j % 3)],color-i);
-
-            //right lines
-            x[i][3 * j + 2] = 0.87 * x[i][3 * j + 1] + 0.5 * y[i][3 * j + 1] - 0.87 * x[i - 1][(j % 3)] - 0.5 * y[i - 1][(j % 3)] + x[i - 1][(j % 3)];
-            y[i][3 * j + 2] = (0.5 * x[i][3 * j + 1]) + 0.87 * y[i][3 * j + 1] - 0.5 * x[i - 1][(j % 3)] - 0.87 * y[i - 1][(j % 3)] + y[i - 1][(j % 3)];
-            //  vTaskDelay(1000);
-            //  drawLine( x[i][3 * j + 2],y[i][3 * j + 2],x[i - 1][(j % 3)],y[i - 1][(j % 3)],color-i);
-        }
-
-    }
-    vTaskDelay(1000);
+//    drawLine(x[0][0], y[0][0], x[1][1], y[1][1], color);
+//
+//    //level 1 left
+//    x[1][0] = x[1][1] * 0.87 + y[1][1] * 0.5 - x[0][0] * 0.87 - y[0][0] * 0.5 + x[0][0]; //left
+//    y[1][0] = -(x[1][1] * 0.5) + y[1][1] * 0.87 + (x[0][0] * 0.5) - y[0][0] * 0.87 + y[0][0]; //left
+//    vTaskDelay(100);
+//    drawLine(x[0][0], y[0][0], x[1][0], y[1][0], color);
+//
+//    //level 1 right
+//    x[1][2] = x[1][1] * 0.87 - y[1][1] * 0.5 - x[0][0] * 0.87 + y[0][0] * 0.5 + x[0][0]; //right
+//    y[1][2] = (x[1][1] * 0.5) + y[1][1] * 0.87 - (x[0][0] * 0.5) - y[0][0] * 0.87 + y[0][0]; // right
+//    vTaskDelay(100);
+//    drawLine(x[0][0], y[0][0], x[1][2], y[1][2], color);
+//
+////    //level 2 mid(hardcoded)
+////    x[2][1] = x[1][0] + (lamda * (x[1][0] - x[0][0]));
+////    y[2][1] = y[1][0] + (lamda * (y[1][0] - y[0][0]));
+////    vTaskDelay(100);
+////    drawLine( x[2][1],y[2][1],x[1][0],y[1][0],color);
+//
+//    //subsequent levels
+//    for (int i = 2; i < 10; i++) {
+//        for (int j = 0; j < pow(3, i - 1); j++) {
+//            //mid lines
+//            x[i][3 * j + 1] = x[i - 1][j] + (lamda * (x[i - 1][j] - x[i - 2][j % 3]));
+//            y[i][3 * j + 1] = y[i - 1][j] + (lamda * (y[i - 1][j] - y[i - 2][j % 3]));
+//            //vTaskDelay(100);
+//            drawLine( x[i][3 * j + 1],y[i][3 * j + 1],x[i - 1][j],y[i - 1][j],color);
+////
+////            //left lines
+////            x[i][3 * j] = 0.87 * x[i][3 * j + 1] + 0.5 * y[i][3 * j + 1] - 0.87 * x[i - 1][(j % 3)] - 0.5 * y[i - 1][(j % 3)] + x[i - 1][(j % 3)];
+////            y[i][3 * j] = -0.5 * x[i][3 * j + 1] + 0.87 * y[i][3 * j + 1] + 0.5 * x[i - 1][(j % 3)] - 0.87 * y[i - 1][(j % 3)] + y[i - 1][(j % 3)];
+////            // vTaskDelay(1000);
+////            // drawLine( x[i][3 * j],y[i][3 * j],x[i - 1][(j % 3)],y[i - 1][(j % 3)],color-i);
+////
+////            //right lines
+////            x[i][3 * j + 2] = 0.87 * x[i][3 * j + 1] + 0.5 * y[i][3 * j + 1] - 0.87 * x[i - 1][(j % 3)] - 0.5 * y[i - 1][(j % 3)] + x[i - 1][(j % 3)];
+////            y[i][3 * j + 2] = (0.5 * x[i][3 * j + 1]) + 0.87 * y[i][3 * j + 1] - 0.5 * x[i - 1][(j % 3)] - 0.87 * y[i - 1][(j % 3)] + y[i - 1][(j % 3)];
+////            //  vTaskDelay(1000);
+////            //  drawLine( x[i][3 * j + 2],y[i][3 * j + 2],x[i - 1][(j % 3)],y[i - 1][(j % 3)],color-i);
+//
+//     //   printf("\ni=%d, j=%d, %lf",i, j,pow(3,i-1));
+//        }
+//
+//    }
+//    vTaskDelay(1000);
 
 }
 
