@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <TFT_22_ILI9225.h>
 #include "tasks.hpp"
 #include "utilities.h"
 #include "io.hpp"
-#include "TFT_22_ILI9225.hpp"
 
 #define RST (uint8_t)29
 #define RS (uint8_t)26
@@ -19,7 +19,7 @@ private:
         int x,y,x1,y1,x2,y2,x3,y3;
         int side;
 public:
-    LCD(uint8_t priority) : scheduler_task("LCD_interface", 1024*3, priority){    }
+    LCD(uint8_t priority) : scheduler_task("LCD_interface", 1024*20, priority){    }
 
     bool init(){
         lcd.setValues(RST,RS,CS,BL);

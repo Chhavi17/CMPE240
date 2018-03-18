@@ -1,4 +1,3 @@
-#include "TFT_22_ILI9225.hpp"
 #include "FreeRTOS.h"
 #include "ssp1.h"
 #include "task.h"
@@ -6,6 +5,7 @@
 #include "stdio.h"
 #include "math.h"
 #include <stdlib.h>
+#include <TFT_22_ILI9225.h>
 #define RS 26
 #define CS 31
 #define RST 29
@@ -614,16 +614,33 @@ void TFT_22_ILI9225::startSS1(int x, int y, int x1, int y1, int x2, int y2, int 
     vTaskDelay(100);
 
 }
-int TFT_22_ILI9225::counter = 0 ;
-void TFT_22_ILI9225::draw_branch(int x_base, int y_base, int xp, int yp, float lamda, uint32_t color)
+//int TFT_22_ILI9225::counter = 0 ;
+void TFT_22_ILI9225::draw_branch(int x_base, int y_base, int xp, int yp, float lamda, uint32_t color, int counter)
 {
-
+//    if (counter > 5 || flag == false) {
+//                counter--;
+//                if(counter == 1 )
+//                {
+//                    counter = 0;
+//                    flag = true;
+//                   return;
+//                }
+//                   else
+//                   {
+//                       flag = false;
+//                       return;
+//                   }
+//            }
+if(counter == 0)
+{
+    return;
+}
     int xm, ym, xl, yl, xr, yr;
     int dx = (xp - x_base);
     int dy = (yp - y_base);
     xm = xp + (lamda * dx);
     ym = yp + (lamda * dy);
-    if (dx < 10 && dy < 10) return;
+   //if (dx < 10 && dy < 10) return;
     // vTaskDelay(100);
 
     if (xm < LCD_WIDTH && ym < LCD_HEIGHT && xp < LCD_WIDTH && yp < LCD_HEIGHT
@@ -646,9 +663,10 @@ void TFT_22_ILI9225::draw_branch(int x_base, int y_base, int xp, int yp, float l
             && xr >0 && yr >0 && xp  >0 && yp  >0)
         drawLine(xp, yp, xr, yr, color);
 
-    draw_branch(xp, yp, xl, yl, lamda, color);
-    draw_branch(xp, yp, xm, ym, lamda, color);
-    draw_branch(xp, yp, xr, yr, lamda, color);
+    draw_branch(xp, yp, xl, yl, lamda, --color,counter-1);
+    draw_branch(xp, yp, xm, ym, lamda, --color,counter-1);
+    draw_branch(xp, yp, xr, yr, lamda, --color,counter-1);
+    vTaskDelay(10);
 }
 
 void TFT_22_ILI9225::draw_tree(int xb, int yb, uint32_t color)
@@ -667,7 +685,8 @@ void TFT_22_ILI9225::draw_tree(int xb, int yb, uint32_t color)
     drawLine(xp, yp, x_base, y_base, color);
     vTaskDelay(100);
 
-    draw_branch(x_base, y_base, xp, yp, lamda, color);
+    int counter = 7;
+    draw_branch(x_base, y_base, xp, yp, lamda, color,counter);
 
 //    //level 1 mid
 //    x[1][1] = x_base;
